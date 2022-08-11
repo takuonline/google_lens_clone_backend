@@ -5,8 +5,7 @@ import json
 import io
 import sys
 from requests import get, put, patch, post
-
-
+from pprint import pprint
 
 def base64_2_pil(data):
     decoded = base64.b64decode(data)
@@ -22,12 +21,12 @@ def pil2base64(im):
 
 
 if __name__ == "__main__":
-    img_num = int(sys.argv[1] )
+    img_num = int(sys.argv[1])
     img_list = Path("test_images").glob("*")
     img = Image.open(list(img_list)[img_num])
 
     img.save("output.jpg")
- 
+
     data = json.dumps({"img_data": pil2base64(img)})
 
     res = post(
@@ -37,13 +36,17 @@ if __name__ == "__main__":
     )
 
     print("status_code: ", res.status_code)
+    print("status_code: ", res.text)
+
     if res.ok:
+
         output = json.loads(res.text)
 
         print(output["label"])
         print()
 
-        output_img = base64_2_pil(output["output_img"])
-        output_img.save("client_side_output.jpg")
+        if output["output_img"]:
+            pprint(output["similar_products"])
 
-
+            output_img = base64_2_pil(output["output_img"])
+            output_img.save("client_side_output.jpg")

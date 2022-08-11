@@ -7,7 +7,9 @@ import torch
 import cv2
 from utils import general
 
+from PIL import Image
 import traceback
+from common.common_utils import CommonUtils
 
 
 def letterbox(
@@ -82,11 +84,14 @@ def rgba2rgb(png):
     return np.array(background)
 
 
-def preprocessing(im):
+def preprocessing(im, stride, imgsz):
+
     if im.shape[2] == 4:
         im = rgba2rgb(im)
 
-    im = letterbox(im)[0]
+    imgsz = general.check_img_size(imgsz, s=stride)  # check img_size
+
+    im = letterbox(im, imgsz, stride)[0]
     im = np.ascontiguousarray(im)
 
     img = torch.from_numpy(im).permute(2, 0, 1).unsqueeze(0).float()
@@ -94,43 +99,67 @@ def preprocessing(im):
     return img
 
 
-def get_img_clip(im, model, names: list, conf_thres=0.2, iou_thres=0.6):
+def get_img_clip(
+    img_data, model, names: list, conf_thres=0.2, iou_thres=0.6, imgsz=640
+):
+    im = CommonUtils.base64_2_pil(img_data.get("img_data"))
+    # img.save("output.jpeg")
+
+    im = np.array(im)
+
+    stride = int(model.stride.max())  # model stride
+    img_preprocessed = preprocessing(im, stride, imgsz)
 
     try:
-        im = np.array(im)
-
-        img_preprocessed = preprocessing(im)
 
         # get pred
         pred, _ = model(img_preprocessed)
-        pred = general.non_max_suppression(
-            pred, conf_thres=conf_thres, iou_thres=iou_thres, multi_label=True
-        )
-        cropped_outputs = []
 
-        det = pred[0]
-        det[:, :4] = general.scale_coords(img_preprocessed.shape[2:], det[:, :4], im.shape).round()
-        largest_confidence = 0
-
-        for *xyxy, conf, cls in det:
-
-            ## only get the cropped_output for the item with largest confidence
-            # if largest_confidence < conf:
-            #     largest_confidence = conf
-            # else:
-            #     continue
-
-            x1, y1, x2, y2 = [int(i.item()) for i in xyxy]
-            crop_img = im[y1:y2, x1:x2]
-            cropped_outputs.append(crop_img)
-
-            label = f"{names[int(cls)]} {conf:.2f}"
-
-        for n, i in enumerate(cropped_outputs):
-            Image.fromarray(i).save(f"cliippedoutput{n}.jpg")
-        return label, cropped_outputs[0]
-
-    except Exception as e:
+    except RuntimeError:
+        print("### ERROR ###")
         traceback.print_exc()
-        print(e)
         return None, None
+
+    pred = general.non_max_suppression(
+        pred, conf_thres=conf_thres, iou_thres=iou_thres, multi_label=True
+    )
+    cropped_outputs = []
+
+    det = pred[0]
+    det[:, :4] = general.scale_coords(
+        img_preprocessed.shape[2:], det[:, :4], im.shape
+    ).round()
+
+    largest_confidence = 0
+    bounds = []
+
+    for *xyxy, conf, cls in det:
+
+        # only get the cropped_output for the item with largest confidence
+        if largest_confidence < conf:
+            largest_confidence = conf
+        else:
+            continue
+
+        bounds = [int(i.item()) for i in xyxy]
+        x1, y1, x2, y2 = bounds
+        crop_img = im[y1:y2, x1:x2]
+        cropped_outputs.append(crop_img)
+
+        label = names[int(cls)]
+        title = f"{label} {conf:.2f}"
+
+    output = dict(label=None, conf=None, output_img=None, title=None, bounds=[])
+    if len(cropped_outputs):
+        for n, i in enumerate(cropped_outputs):
+            Image.fromarray(i).save(f"clippedoutput_{n}.jpg")
+
+        pil_img = Image.fromarray(cropped_outputs[0])
+
+        output["label"] = label
+        output["conf"] = float(conf)
+        output["output_img"] = pil_img
+        output["title"] = title
+        output["bounds"] = bounds
+
+    return output

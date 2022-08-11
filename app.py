@@ -1,6 +1,6 @@
 from flask import Flask
-from flask_restful import Api, abort
-from resources.img_slice import Detect
+from flask_restful import Api
+from resources.detect import Detect
 from resources.home import Home
 
 

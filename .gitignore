@@ -1,5 +1,8 @@
 
 common/ml_models/
+*.pt
+*.csv
+*.jpg
 
 
 # Byte-compiled / optimized / DLL files
