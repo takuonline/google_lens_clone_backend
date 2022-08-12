@@ -103,6 +103,7 @@ def get_img_clip(
     img_data, model, names: list, conf_thres=0.2, iou_thres=0.6, imgsz=640
 ):
     im = CommonUtils.base64_2_pil(img_data.get("img_data"))
+    output = dict(label=None, conf=None, output_img=None, title=None, bounds=[])
     # img.save("output.jpeg")
 
     im = np.array(im)
@@ -118,7 +119,7 @@ def get_img_clip(
     except RuntimeError:
         print("### ERROR ###")
         traceback.print_exc()
-        return None, None
+        return output
 
     pred = general.non_max_suppression(
         pred, conf_thres=conf_thres, iou_thres=iou_thres, multi_label=True
@@ -149,7 +150,7 @@ def get_img_clip(
         label = names[int(cls)]
         title = f"{label} {conf:.2f}"
 
-    output = dict(label=None, conf=None, output_img=None, title=None, bounds=[])
+
     if len(cropped_outputs):
         for n, i in enumerate(cropped_outputs):
             Image.fromarray(i).save(f"clippedoutput_{n}.jpg")

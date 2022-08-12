@@ -26,7 +26,6 @@ transforms = T.Compose(
 class Resnet101Search:
     num_classes = 2048
 
-
     def __init__(self, stored_img_embeddings_path,device,img_metadata):
 
         # instantiate model
@@ -74,6 +73,7 @@ class Resnet101Search:
 
     def run_search(self, detection_res:dict,num_of_results:int=5):
         pil_img = detection_res["output_img"]
+        pil_img.save("output.jpg")
         img_embedding_detached = self.transform(pil_img)
         res = self.search_match(img_embedding_detached, k=int(num_of_results))
 

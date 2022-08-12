@@ -8,11 +8,13 @@ class Config:
     ML_MODEL_DIR = BASE_PATH / Path("common") / Path("ml_models")
     DATA_DIR = BASE_PATH / Path("data")
 
+    YOLOV7_PATH = ML_MODEL_DIR / Path("yolov7.pt")
+    YOLOV7_W6_PATH = ML_MODEL_DIR / Path("yolov7-w6.pt")
+    YOLOV7_X_PATH = ML_MODEL_DIR / Path("yolov7x.pt")
+    YOLOV7_E6_PATH = ML_MODEL_DIR / Path("yolov7-e6.pt")
+    YOLOV7_D6_PATH = ML_MODEL_DIR / Path("yolov7-d6.pt")
+    YOLOV7_E6E_PATH = ML_MODEL_DIR / Path("yolov7-e6e.pt")
 
-    MODEL_E6_PATH = ML_MODEL_DIR / Path("yolov7-e6.pt")
-    MODEL_PATH = ML_MODEL_DIR / Path("yolov7.pt")
-    MODEL_W6_PATH = ML_MODEL_DIR / Path("yolov7-w6.pt")
-    MODEL_X_PATH = ML_MODEL_DIR / Path("yolov7x.pt")
 
     device = torch.device("cpu")
 

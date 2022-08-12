@@ -9,14 +9,19 @@ from flask import jsonify, request
 
 
 class Detect(Resource):
-    def __init__(self, *args, **kwargs) -> None:
+    # def __init__(self, *args, **kwargs) -> None:
 
-        print("###" * 30)
-        print("DETECT INIT METHOD")
-        print("###" * 30)
+
+
+    #     super().__init__(*args, **kwargs)
+
+    def get(self):
+        return "img_data", 200
+
+    def post(self):
 
         # instantiate yolo model
-        self.model = torch.load(Config.MODEL_PATH, map_location=Config.device)["model"]
+        self.model = torch.load(Config.YOLOV7_PATH, map_location=Config.device)["model"]
         self.names = self.model.names  # get prediction classes
         _ = self.model.eval()
         _ = self.model.float()
@@ -29,12 +34,8 @@ class Detect(Resource):
 
         )
 
-        super().__init__(*args, **kwargs)
 
-    def get(self):
-        return "img_data", 200
 
-    def post(self):
         # parse request data
         img_data = request.get_json()
         num_of_results = img_data.get("num_of_results",Config.NUM_OF_PRODUCTS_RESULTS) # use default value if num_of_results is not defined
