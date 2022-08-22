@@ -7,6 +7,7 @@ import sys
 from requests import get, put, patch, post
 from pprint import pprint
 
+
 def base64_2_pil(data):
     decoded = base64.b64decode(data)
     img = Image.open(io.BytesIO(decoded))
@@ -30,7 +31,7 @@ if __name__ == "__main__":
     data = json.dumps({"img_data": pil2base64(img)})
 
     res = post(
-        "http://localhost:5000/detect",
+        "http://localhost:8000/detect",
         data=data,
         headers={"Content-Type": "application/json"},
     )

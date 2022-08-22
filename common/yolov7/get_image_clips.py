@@ -75,21 +75,12 @@ def plot_one_box_PIL(box, img, color=None, label=None, line_thickness=None):
     return np.asarray(img)
 
 
-def rgba2rgb(png):
-    png = Image.fromarray(png)
-    png.load()  # required for png.split()
-    background = Image.new("RGB", png.size, (255, 255, 255))
-    background.paste(png, mask=png.split()[3])  # 3 is the alpha channel
-
-    return np.array(background)
-
-
 def preprocessing(im, stride, imgsz):
 
     if im.shape[2] == 4:
-        im = rgba2rgb(im)
+        im = CommonUtils.rgba2rgb(im)
 
-    imgsz = general.check_img_size(imgsz, s=stride)  # check img_size
+    imgsz = general.check_img_size(imgsz, s=stride)
 
     im = letterbox(im, imgsz, stride)[0]
     im = np.ascontiguousarray(im)
@@ -103,7 +94,11 @@ def get_img_clip(
     img_data, model, names: list, conf_thres=0.2, iou_thres=0.6, imgsz=640
 ):
     im = CommonUtils.base64_2_pil(img_data.get("img_data"))
-    output = dict(label=None, conf=None, output_img=None, title=None, bounds=[])
+    im.save("orig_img.jpg")
+
+    output = dict(
+        label=None, conf=None, output_img=None, title=None, bounds=[], im_shape=None
+    )
     # img.save("output.jpeg")
 
     im = np.array(im)
@@ -141,19 +136,20 @@ def get_img_clip(
             largest_confidence = conf
         else:
             continue
+        bounds = [i.item() for i in xyxy]
 
-        bounds = [int(i.item()) for i in xyxy]
-        x1, y1, x2, y2 = bounds
-        crop_img = im[y1:y2, x1:x2]
+        x1, y1, x2, y2 = [
+            int(i.item()) for i in xyxy
+        ]  # convert bounds into int so that we can slice
+        crop_img = im[y1:y2, x1:x2]  # crop out detected object
         cropped_outputs.append(crop_img)
 
         label = names[int(cls)]
         title = f"{label} {conf:.2f}"
 
-
     if len(cropped_outputs):
         for n, i in enumerate(cropped_outputs):
-            Image.fromarray(i).save(f"clippedoutput_{n}.jpg")
+            Image.fromarray(i).save(f"clipped_output_{n}.jpg")
 
         pil_img = Image.fromarray(cropped_outputs[0])
 
@@ -162,5 +158,6 @@ def get_img_clip(
         output["output_img"] = pil_img
         output["title"] = title
         output["bounds"] = bounds
+        output["im_shape"] = im.shape[:2]
 
     return output
