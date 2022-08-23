@@ -33,7 +33,7 @@ class Detect(Resource):
         # instantiate resnet101 model
         self.embedding_model = img_search.ImgSearchModel(
             img_metadata=Config.GAME_IMGS_DATA_PATH,
-            stored_img_embeddings_path=Config.GAME_RESNET101_EMBEDDINGS_PATH,
+            stored_img_indexes_path=Config.GAME_RESNET101_INDEX_PATH,
             device=Config.device,
         )
 

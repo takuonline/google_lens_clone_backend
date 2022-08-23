@@ -15,8 +15,7 @@ services:
         source: \.     # local dir. For windows use \ instead of /
         target: /app   # docker container path
     command: >
-        sh -c "python3 scripts/download_ml_model.py &&
-               python3 app.py"
+        sh -c "python3 app.py"
     # command: >
     #     sh -c "python3 scripts/download_ml_model.py &&
     #            python3 app.py"

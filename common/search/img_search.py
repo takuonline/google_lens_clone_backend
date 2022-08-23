@@ -7,11 +7,10 @@ from torchvision import transforms as T
 import torch
 
 import torchvision.transforms.functional as TVF
+import annoy
 
-from scipy import spatial
 
 from config import Config
-from common.common_utils import CommonUtils
 
 
 transforms = T.Compose(
@@ -26,7 +25,7 @@ transforms = T.Compose(
 class ImgSearchModel:
     def __init__(
         self,
-        stored_img_embeddings_path,
+        stored_img_indexes_path,
         img_metadata,
         device,
         embedding_size=2048,
@@ -47,10 +46,9 @@ class ImgSearchModel:
         self.embedding_model = self.embedding_model.to(device)
         _ = self.embedding_model.eval()
 
-        # instatiate kdtree
-
-        stored_img_embeddings = torch.load(stored_img_embeddings_path)
-        self.tree = spatial.KDTree(stored_img_embeddings)
+        # instatiate annoy tree
+        self.tree =  annoy.AnnoyIndex(embedding_size,  'manhattan')
+        self.tree.load(stored_img_indexes_path.as_posix())
 
         # load metadata
         self.df = pd.read_csv(img_metadata)
@@ -81,20 +79,18 @@ class ImgSearchModel:
 
         return img_embedding_detached
 
-    def _search_match(self, query_embedding, k=5):
+    def _search_match(self, query_embedding, n=5):
+        res_indexes = self.tree.get_nns_by_vector(query_embedding, n=n)
+        # return self.df.iloc[res_indexes]
+        return self.df[self.df["embedding_index"].isin(res_indexes)]
 
-        v = self.tree.query(query_embedding, k=k)
-
-        res_indexes = list(v[1][:])
-        # print(res_indexes)
-        return self.df.iloc[res_indexes]
 
     def run_search(self, detection_res: dict, num_of_results: int = 5):
         pil_img = detection_res["output_img"]
         # print("run_search"*30)
         pil_img.save("run_searchoutput.jpg")
         query_embedding = self._transform(pil_img)
-        res = self._search_match(query_embedding, k=int(num_of_results))
+        res = self._search_match(query_embedding, n=int(num_of_results))
 
         detection_res["similar_products"] = res.to_dict(orient="records")
         # detection_res["output_img"] = CommonUtils.pil2base64(pil_img)

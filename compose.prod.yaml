@@ -2,8 +2,6 @@ version: '3'
 
 services:
   backend:
-    # image: backend_backend
-    # image: takuonline:google_lense_clone_backend
     build:
       context: .
 
