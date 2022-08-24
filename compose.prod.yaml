@@ -10,11 +10,8 @@ services:
 
     volumes:
       - type: bind
-        source: \.     # local dir. For windows use \ instead of /
+        source: /.     # local dir. For windows use \ instead of /
         target: /app   # docker container path
-    # command: >
-    #     sh -c "python3 scripts/download_ml_model.py &&
-    #            python3 app.py"
     command: >
           sh -c  "python3 scripts/download_ml_model.py &&
                   gunicorn -w 2  -b 0.0.0.0  app:app   "

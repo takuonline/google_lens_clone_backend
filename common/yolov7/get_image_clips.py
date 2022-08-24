@@ -10,6 +10,7 @@ from utils import general
 from PIL import Image
 import traceback
 from common.common_utils import CommonUtils
+from config import Config
 
 
 def letterbox(
@@ -90,16 +91,40 @@ def preprocessing(im, stride, imgsz):
     return img
 
 
-def get_img_clip(
-    img_data, model, names: list, conf_thres=0.2, iou_thres=0.6, imgsz=640
-):
+def postprocessing(pred, img_preprocessed, im):
+    pred = general.non_max_suppression(
+        pred,
+        conf_thres=Config.CONF_THRESHOLD,
+        iou_thres=Config.IOU_THRESHOLD,
+        multi_label=True,
+    )
+
+    det = pred[0]
+    det[:, :4] = general.scale_coords(
+        img_preprocessed.shape[2:], det[:, :4], im.shape
+    ).round()
+
+    return det
+
+
+def get_img_clip(img_data, model, names: list, imgsz=640):
+
     im = CommonUtils.base64_2_pil(img_data.get("img_data"))
-    im.save("orig_img.jpg")
 
     output = dict(
-        label=None, conf=None, output_img=None, title=None, bounds=[], im_shape=None
+        label=None,
+        conf=None,
+        search_img=None,
+        title=None,
+        bounds=[],
+        im_shape=None,
+        other_objects=[],
+        is_general=False,
     )
-    # img.save("output.jpeg")
+
+    if not im:
+        # failed to process image (base64_2_pil)
+        return output
 
     im = np.array(im)
 
@@ -107,57 +132,53 @@ def get_img_clip(
     img_preprocessed = preprocessing(im, stride, imgsz)
 
     try:
-
-        # get pred
         pred, _ = model(img_preprocessed)
-
     except RuntimeError:
         print("### ERROR ###")
         traceback.print_exc()
         return output
 
-    pred = general.non_max_suppression(
-        pred, conf_thres=conf_thres, iou_thres=iou_thres, multi_label=True
-    )
+    det = postprocessing(pred, img_preprocessed, im)
+
     cropped_outputs = []
-
-    det = pred[0]
-    det[:, :4] = general.scale_coords(
-        img_preprocessed.shape[2:], det[:, :4], im.shape
-    ).round()
-
     largest_confidence = 0
-    bounds = []
 
     for *xyxy, conf, cls in det:
-
         # only get the cropped_output for the item with largest confidence
-        if largest_confidence < conf:
-            largest_confidence = conf
-        else:
+        if largest_confidence > conf:
             continue
+
+        largest_confidence = conf
         bounds = [i.item() for i in xyxy]
 
-        x1, y1, x2, y2 = [
-            int(i.item()) for i in xyxy
-        ]  # convert bounds into int so that we can slice
+        # convert bounds into int so that we can slice
+        x1, y1, x2, y2 = [int(i.item()) for i in xyxy]
         crop_img = im[y1:y2, x1:x2]  # crop out detected object
         cropped_outputs.append(crop_img)
 
         label = names[int(cls)]
         title = f"{label} {conf:.2f}"
 
-    if len(cropped_outputs):
-        for n, i in enumerate(cropped_outputs):
-            Image.fromarray(i).save(f"clipped_output_{n}.jpg")
+    if not cropped_outputs:
+        # no object found
+        crop_img, bounds = CommonUtils.crop_img(im)
+        cropped_outputs.append(crop_img)
+        label = None
+        largest_confidence = 0
+        title = None
+        output["is_crop"] = True
 
-        pil_img = Image.fromarray(cropped_outputs[0])
+    ## DEBUGGING ##
+    # for n, i in enumerate(cropped_outputs):
+    #     Image.fromarray(i).save(f"tests/clipped_output_{n}.jpg")
 
-        output["label"] = label
-        output["conf"] = float(conf)
-        output["output_img"] = pil_img
-        output["title"] = title
-        output["bounds"] = bounds
-        output["im_shape"] = im.shape[:2]
+    pil_img = Image.fromarray(cropped_outputs[0])
+
+    output["label"] = label
+    output["conf"] = float(largest_confidence)
+    output["search_img"] = pil_img
+    output["title"] = title
+    output["bounds"] = bounds
+    output["im_shape"] = im.shape[:2]
 
     return output

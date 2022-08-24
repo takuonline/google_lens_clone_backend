@@ -1,7 +1,8 @@
 import base64
 import io
-from PIL import Image,UnidentifiedImageError
+from PIL import Image, UnidentifiedImageError
 import numpy as np
+
 
 class CommonUtils:
     @staticmethod
@@ -11,8 +12,9 @@ class CommonUtils:
             img = Image.open(io.BytesIO(decoded))
             return img
         except UnidentifiedImageError:
+            print("UnidentifiedImageError")
             print(data)
-
+            return None
 
     @staticmethod
     def pil2base64(im):
@@ -29,3 +31,16 @@ class CommonUtils:
         background.paste(png, mask=png.split()[3])  # 3 is the alpha channel
 
         return np.array(background)
+
+    @staticmethod
+    def crop_img(img_array, scale=0.50):
+        center_x, center_y = img_array.shape[1] / 2, img_array.shape[0] / 2
+        width_scaled, height_scaled = (
+            img_array.shape[1] * scale,
+            img_array.shape[0] * scale,
+        )
+        left_x, right_x = center_x - width_scaled / 2, center_x + width_scaled / 2
+        top_y, bottom_y = center_y - height_scaled / 2, center_y + height_scaled / 2
+        img_cropped = img_array[int(top_y) : int(bottom_y), int(left_x) : int(right_x)]
+        bounds = [left_x, top_y, right_x, bottom_y]
+        return img_cropped, bounds

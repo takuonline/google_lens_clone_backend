@@ -4,6 +4,13 @@ common/ml_models/
 *.csv
 *.jpg
 *.pem
+*.zip
+# annoy indexes
+*.ann 
+
+
+
+
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

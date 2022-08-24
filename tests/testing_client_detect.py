@@ -4,8 +4,10 @@ import base64
 import json
 import io
 import sys
-from requests import get, put, patch, post
+from requests import get, put, patch, post, delete
 from pprint import pprint
+import numpy as np
+from test_config import TestConfig
 
 
 def base64_2_pil(data):
@@ -22,16 +24,27 @@ def pil2base64(im):
 
 
 if __name__ == "__main__":
-    img_num = int(sys.argv[1])
-    img_list = Path("test_images").glob("*")
+    if len(sys.argv) > 1:
+
+        img_num = int(sys.argv[1])
+    else:
+        img_num = np.random.randint(0, 27)
+
+    # img_list = Path("test_images").glob("*")
+    img_list = Path("../../game_store_images/").glob("*")
     img = Image.open(list(img_list)[img_num])
 
-    img.save("output.jpg")
+    img.save("testing_input_image.jpg")
 
-    data = json.dumps({"img_data": pil2base64(img)})
+    data = json.dumps(
+        {
+            "img_data": pil2base64(img),
+        }
+    )
 
     res = post(
-        "http://localhost:8000/detect",
+        TestConfig.base_url + "/detect",
+        # "http://34.241.9.189:8000/detect",
         data=data,
         headers={"Content-Type": "application/json"},
     )
@@ -46,8 +59,4 @@ if __name__ == "__main__":
         print(output["label"])
         print()
 
-        if output["output_img"]:
-            pprint(output["similar_products"])
-
-            output_img = base64_2_pil(output["output_img"])
-            output_img.save("client_side_output.jpg")
+        pprint(output["similar_products"])
