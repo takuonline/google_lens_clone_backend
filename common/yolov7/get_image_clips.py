@@ -119,11 +119,11 @@ def get_img_clip(img_data, model, names: list, imgsz=640):
         bounds=[],
         im_shape=None,
         other_objects=[],
-        is_general=False,
+        is_crop=False,
     )
 
     if not im:
-        # failed to process image (base64_2_pil)
+        # failed to convert image from base64 (base64_2_pil)
         return output
 
     im = np.array(im)

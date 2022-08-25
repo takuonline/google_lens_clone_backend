@@ -33,11 +33,11 @@ class CommonUtils:
         return np.array(background)
 
     @staticmethod
-    def crop_img(img_array, scale=0.50):
+    def crop_img(img_array, w_scale=0.70, h_scale=0.40):
         center_x, center_y = img_array.shape[1] / 2, img_array.shape[0] / 2
         width_scaled, height_scaled = (
-            img_array.shape[1] * scale,
-            img_array.shape[0] * scale,
+            img_array.shape[1] * w_scale,
+            img_array.shape[0] * h_scale,
         )
         left_x, right_x = center_x - width_scaled / 2, center_x + width_scaled / 2
         top_y, bottom_y = center_y - height_scaled / 2, center_y + height_scaled / 2

@@ -5,17 +5,14 @@ from common.yolov7.get_image_clips import get_img_clip
 from config import Config
 import torch
 from flask import jsonify, request
+from common.cache import get_embedding_model
 
 
 class ImgSearch(Resource):
     def post(self):
 
         # instantiate resnet101 model
-        self.embedding_model = img_search.ImgSearchModel(
-            img_metadata=Config.GAME_IMGS_DATA_PATH,
-            stored_img_indexes_path=Config.GAME_RESNET101_INDEX_PATH,
-            device=Config.device,
-        )
+        embedding_model = get_embedding_model()
 
         # parse request data
         img_data = request.get_json()
@@ -24,8 +21,6 @@ class ImgSearch(Resource):
         )  # use default value if num_of_results is not defined
 
         # search the image clip in product database
-        search_res = self.embedding_model.search(
-            img_data, num_of_results=num_of_results
-        )
+        search_res = embedding_model.search(img_data, num_of_results=num_of_results)
 
         return jsonify(search_res)

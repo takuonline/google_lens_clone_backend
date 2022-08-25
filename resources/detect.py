@@ -6,6 +6,8 @@ from config import Config
 import torch
 from flask import jsonify, request
 
+from common.cache import get_yolo, get_embedding_model
+
 
 class Detect(Resource):
     # def __init__(self, *args, **kwargs) -> None:
@@ -16,43 +18,25 @@ class Detect(Resource):
         return "img_data", 200
 
     def post(self):
+        embedding_model = get_embedding_model()
+        yolo_model = get_yolo()
 
-        # instantiate yolo model
-        model = torch.load(Config.YOLOV7_PATH, map_location=Config.device)["model"]
-        names = model.names  # get prediction classes
-        _ = model.eval()
-        _ = model.float()
-
-        # # instantiate resnet101 model
-        # embedding_model = img_search.Resnet101Search(
-        #     img_metadata = Config.PNP_IMGS_DATA_PATH,
-        #     stored_img_embeddings_path = Config.PNP_RESNET101_EMBEDDINGS_PATH,
-        #     device = Config.device,
-        # )
-        # instantiate resnet101 model
-        embedding_model = img_search.ImgSearchModel(
-            img_metadata=Config.GAME_IMGS_DATA_PATH,
-            stored_img_indexes_path=Config.GAME_RESNET101_INDEX_PATH,
-            device=Config.device,
-        )
+        names = yolo_model.names  # get prediction classes
 
         # parse request data
         img_data = request.get_json()
         num_of_results = img_data.get(
             "num_of_results", Config.NUM_OF_PRODUCTS_RESULTS
-        )  # use default value if num_of_results is not defined
+        )  # use default Config.NUM_OF_PRODUCTS_RESULTS value if num_of_results is not defined
 
         detection_res = get_img_clip(
             img_data,
-            model=model,
+            model=yolo_model,
             names=names,
         )
 
-        if detection_res.get("search_img", None) == None:
-            return jsonify(detection_res)
-
         # search the image clip in out database
-        search_res = embedding_model.search(
+        search_res = embedding_model.search_clip(
             detection_res, num_of_results=num_of_results
         )
 

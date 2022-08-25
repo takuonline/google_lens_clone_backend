@@ -26,7 +26,6 @@ class ImgSearchModel:
         self,
         stored_img_indexes_path,
         img_metadata,
-        device,
         embedding_size=2048,
         model=None,
     ):
@@ -49,7 +48,7 @@ class ImgSearchModel:
             )
         in_features = self.embedding_model.fc.in_features
         self.embedding_model.fc = nn.Linear(in_features, self.embedding_size)
-        self.embedding_model = self.embedding_model.to(device)
+        self.embedding_model = self.embedding_model.to(Config.device)
         self.embedding_model.eval()
 
         # instatiate annoy tree
@@ -87,21 +86,37 @@ class ImgSearchModel:
             [self.df[self.df["embedding_index"] == i] for i in res_indexes], axis=0
         )
 
-    def search(self, detection_res: dict, num_of_results: int = 5):
-        search_img = detection_res.get("search_img")
-        if isinstance(search_img, str):
-            pil_img = CommonUtils.base64_2_pil(search_img)
-        else:
-            pil_img = search_img
+    def search_clip(self, detection_res: dict, num_of_results: int = 5):
 
+        pil_img = detection_res.get("search_img")
         del detection_res["search_img"]
-
         if pil_img:
             pil_img.save("tests/yolo_output.jpg")
 
         query_embedding = self._transform(pil_img)
         res = self._search_match(query_embedding, n=int(num_of_results))
 
+        detection_res["similar_products"] = res.to_dict(orient="records")
+
+        return detection_res
+
+    def search(self, detection_res: dict, num_of_results: int = 5):
+        search_img = detection_res.get("img_data")
+        pil_img = CommonUtils.base64_2_pil(search_img)
+
+        del detection_res["img_data"]
+
+        width, height = pil_img.size
+
+        detection_res["im_shape"] = [height, width]
+        detection_res["bounds"] = [0, 0, width, height]
+        detection_res["is_crop"] = False
+
+        if pil_img:
+            pil_img.save("tests/yolo_output.jpg")
+
+        query_embedding = self._transform(pil_img)
+        res = self._search_match(query_embedding, n=int(num_of_results))
         detection_res["similar_products"] = res.to_dict(orient="records")
 
         return detection_res

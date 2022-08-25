@@ -2,6 +2,7 @@ annoy==1.17.0
 black==22.6.0
 Flask==2.2.1
 Flask-RESTful==0.3.9
+Flask-Caching==2.0.1
 gunicorn==20.1.0
 marshmallow==3.17.0
 opencv-python==4.6.0.66
