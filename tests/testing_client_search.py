@@ -3,7 +3,6 @@ from pathlib import Path
 import base64
 import json
 import io
-import sys
 from requests import get, put, patch, post
 from pprint import pprint
 import numpy as np
@@ -25,7 +24,6 @@ def pil2base64(im):
 
 if __name__ == "__main__":
 
-    # img_list = Path("test_images").glob("*")
     img_list = list(Path("../../game_store_images/").glob("*"))
     img_num = np.random.randint(0, len(img_list))
     print("rand int", img_num)
