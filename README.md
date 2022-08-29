@@ -1,18 +1,12 @@
-
 <a name="readme-top"></a>
-
-
 
 <!-- PROJECT LOGO -->
 <br />
 <div align="center">
 
-
-  <!-- <a href="https://github.com/othneildrew/Best-README-Template">
-    <img src="images/logo.png" alt="Logo" width="80" height="80">
-  </a> -->
-
-
+  <a href="https://github.com/othneildrew/Best-README-Template">
+    <img src="static/images/applogo.png" alt="Logo" width="80" height="80">
+  </a>
 
   <h3 align="center">Google lens app clone </h3>
    <p align="center">
@@ -38,6 +32,7 @@
       <a href="#about-the-project">About The Project</a>
       <ul>
         <li><a href="#built-with">Built With</a></li>
+        <li><a href="#project-structure">Project Structure</a></li>
       </ul>
     </li>
     <li>
@@ -47,12 +42,12 @@
         <li><a href="#installation">Installation</a></li>
       </ul>
     </li>
-    <li><a href="#usage">Usage</a></li>
-    <li><a href="#roadmap">Roadmap</a></li>
-    <li><a href="#contributing">Contributing</a></li>
-    <li><a href="#license">License</a></li>
+    <!-- <li><a href="#usage">Usage</a></li> -->
+    <!-- <li><a href="#roadmap">Roadmap</a></li> -->
+    <!-- <li><a href="#contributing">Contributing</a></li> -->
+    <!-- <li><a href="#license">License</a></li> -->
     <li><a href="#contact">Contact</a></li>
-    <li><a href="#acknowledgments">Acknowledgments</a></li>
+    <!-- <li><a href="#acknowledgments">Acknowledgments</a></li> -->
   </ol>
 </details>
 
@@ -64,6 +59,11 @@
 
 <br />
 <hr>
+
+
+
+
+
 
 ### Built With
 
@@ -108,20 +108,37 @@
 ### Installation
 
 1.  Clone the repo
+
     ```
     git clone https://github.com/takuonline/google_lens_clone_backend.git
     ```
-2.  Run the commmand below initialize the server
+
+2.  Download the `yolov7.pt` and `data` folder from this link
+
+    ```
+    https://drive.google.com/drive/folders/1mnWPtULGihbtH_YT7gH3SHBKEQc0hFYS?usp=sharing
+
+    ```
+
+3.  Extract and replace the `./backend/data` folder with the one you download above
+
+4.  Place the `yolov7.pt` file in the `./backend/common/ml_models` directory
+
+5.  Run the commmand below initialize the server on port 8000
 
     ```
     docker compose -f compose.prod.yaml up
     ```
+
+
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 <!-- CONTACT -->
 
 ## Contact
+
+<br>
 
 twitter - [@takuonline](https://twitter.com/takuonline)
 
@@ -142,11 +159,6 @@ Use this space to list resources you find helpful and would like to give credit 
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
-
-
-
-
-
 
 [contributors-shield]: https://img.shields.io/github/contributors/othneildrew/Best-README-Template.svg?style=for-the-badge
 [contributors-url]: https://github.com/othneildrew/Best-README-Template/graphs/contributors
