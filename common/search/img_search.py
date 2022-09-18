@@ -6,7 +6,7 @@ from torchvision import models
 from torchvision import transforms as T
 
 from config import Config
-from common.common_utils import CommonUtils
+from utils.common_utils import CommonUtils
 
 import numpy as np
 import torch
@@ -104,7 +104,8 @@ class ImgSearchModel:
         search_img = detection_res.get("img_data")
         pil_img = CommonUtils.base64_2_pil(search_img)
 
-        del detection_res["img_data"]
+        if detection_res.get("img_data"): # delete if exists
+            detection_res["img_data"]
 
         width, height = pil_img.size
 

@@ -6,25 +6,29 @@ import numpy as np
 
 class CommonUtils:
     @staticmethod
-    def base64_2_pil(data):
-        decoded = base64.b64decode(data)
+    def base64_2_pil(data:str) -> Image:
         try:
+            decoded = base64.b64decode(data)
             img = Image.open(io.BytesIO(decoded))
             return img
         except UnidentifiedImageError:
             print("UnidentifiedImageError")
             print(data)
             return None
+        except TypeError:
+            print("TypeError")
+            print(data)
+            return None
 
     @staticmethod
-    def pil2base64(im):
+    def pil2base64(im:Image) -> str:
         buffered = io.BytesIO()
         im.save(buffered, format="JPEG")
         img_str = base64.b64encode(buffered.getvalue()).decode("utf-8")
         return img_str
 
     @staticmethod
-    def rgba2rgb(png):
+    def rgba2rgb(png:np.array)-> np.array:
         png = Image.fromarray(png)
         png.load()  # required for png.split()
         background = Image.new("RGB", png.size, (255, 255, 255))
@@ -33,7 +37,7 @@ class CommonUtils:
         return np.array(background)
 
     @staticmethod
-    def crop_img(img_array, w_scale=0.70, h_scale=0.40):
+    def crop_img(img_array:np.array, w_scale:float=0.70, h_scale:float=0.40):
         center_x, center_y = img_array.shape[1] / 2, img_array.shape[0] / 2
         width_scaled, height_scaled = (
             img_array.shape[1] * w_scale,

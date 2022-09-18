@@ -8,7 +8,7 @@ import torch.nn as nn
 from torchvision import transforms as T
 import uuid
 import traceback
-from common.common_utils import CommonUtils
+from utils.common_utils import CommonUtils
 from config import Config
 
 import annoy

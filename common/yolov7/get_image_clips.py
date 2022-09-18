@@ -9,9 +9,9 @@ from utils import general
 
 from PIL import Image
 import traceback
-from common.common_utils import CommonUtils
+from utils.common_utils import CommonUtils
 from config import Config
-
+import math
 
 def letterbox(
     img,
@@ -76,6 +76,22 @@ def plot_one_box_PIL(box, img, color=None, label=None, line_thickness=None):
     return np.asarray(img)
 
 
+def check_img_size(img_size, s=32):
+    # Verify img_size is a multiple of stride s
+    new_size = make_divisible(img_size, int(s))  # ceil gs-multiple
+    if new_size != img_size:
+        print(
+            "WARNING: --img-size %g must be multiple of max stride %g, updating to %g"
+            % (img_size, s, new_size)
+        )
+    return new_size
+
+
+def make_divisible(x, divisor):
+    # Returns x evenly divisible by divisor
+    return math.ceil(x / divisor) * divisor
+
+
 def preprocessing(im, stride, imgsz):
 
     if im.shape[2] == 4:
@@ -128,7 +144,7 @@ def get_img_clip(img_data, model, names: list, imgsz=640):
 
     im = np.array(im)
 
-    stride = int(model.stride.max())  # model stride
+    stride = Config.YOLOV7_STRIDE  # model stride
     img_preprocessed = preprocessing(im, stride, imgsz)
 
     try:

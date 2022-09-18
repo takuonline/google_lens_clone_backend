@@ -1,5 +1,4 @@
 from PIL import Image
-from pathlib import Path
 import base64
 import json
 import io
@@ -24,7 +23,7 @@ def pil2base64(im):
 
 if __name__ == "__main__":
 
-    img_list = list(Path("../../game_store_images/").glob("*"))
+    img_list = list(TestConfig.img_path.glob("*"))
     img_num = np.random.randint(0, len(img_list))
     print("rand int", img_num)
 
@@ -36,7 +35,6 @@ if __name__ == "__main__":
 
     res = post(
         TestConfig.base_url + "/search",
-        # "http://34.241.9.189:8000/detect",
         data=data,
         headers={"Content-Type": "application/json"},
     )
