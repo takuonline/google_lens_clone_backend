@@ -10,11 +10,10 @@ class Config:
     INDEXES_PATH = DATA_DIR / Path("annoy_indexes")
     EMBEDDINGS_PATH = DATA_DIR / Path("embeddings")
 
-    LABELS_FILE = DATA_DIR/Path("label_names.txt")
+    LABELS_FILE = DATA_DIR / Path("yolov7_label_names.txt")
 
     YOLOV7_PATH = ML_MODEL_DIR / Path("yolov7.torchscript.pt")
     YOLOV7_STRIDE = 32
-
 
     YOLOV7_W6_PATH = ML_MODEL_DIR / Path("yolov7-w6.pt")
     YOLOV7_X_PATH = ML_MODEL_DIR / Path("yolov7x.pt")

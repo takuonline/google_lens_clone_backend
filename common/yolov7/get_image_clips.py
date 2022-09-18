@@ -13,6 +13,7 @@ from utils.common_utils import CommonUtils
 from config import Config
 import math
 
+
 def letterbox(
     img,
     new_shape=(640, 640),

@@ -104,7 +104,7 @@ class ImgSearchModel:
         search_img = detection_res.get("img_data")
         pil_img = CommonUtils.base64_2_pil(search_img)
 
-        if detection_res.get("img_data"): # delete if exists
+        if detection_res.get("img_data"):  # delete if exists
             detection_res["img_data"]
 
         width, height = pil_img.size

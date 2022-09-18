@@ -5,6 +5,7 @@ import numpy as np
 import torch
 import torchvision
 
+
 def check_img_size(img_size, s=32):
     # Verify img_size is a multiple of stride s
     new_size = make_divisible(img_size, int(s))  # ceil gs-multiple

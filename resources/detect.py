@@ -4,8 +4,8 @@ from config import Config
 from flask import jsonify, request
 from common import cache
 
-class Detect(Resource):
 
+class Detect(Resource):
     def get(self):
         return "img_data", 200
 
